@@ -3,12 +3,13 @@ import sys
 import pygame
 
 from settings import Settings
+from ship import Ship
 
 class AlienInvasion:
-	"""A generic class that controls game resources and behavior."""
+	"""Overall class to manage game assets and behavior."""
 
 	def __init__(self):
-		"""Initialize game, create game resources."""
+		"""Initialize the game, and create game resources."""
 		pygame.init()
 		self.settings = Settings()
 
@@ -16,9 +17,11 @@ class AlienInvasion:
 			(self.settings.screen_width, self.settings.screen_height))
 		pygame.display.set_caption("Alien Invasion")
 
+		self.ship = Ship(self)
+
 
 	def run_game(self):
-		"""Start the main cycle of the game."""
+		"""Start the main loop for the game."""
 		while True:
 
 			# Monitor mouse and keyboard events.
@@ -28,6 +31,7 @@ class AlienInvasion:
 
 				# Redraw the screen on each loop interpretation.
 				self.screen.fill(self.settings.bg_color)
+				self.ship.blitme()
 
 				# Show the last normal screen.
 				pygame.display.flip()

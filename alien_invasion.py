@@ -12,6 +12,8 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 
+FPS = 60
+
 class AlienInvasion:
 	"""Overall class to manage game assets and behavior."""
 
@@ -24,6 +26,8 @@ class AlienInvasion:
 		self.settings.screen_width = self.screen.get_rect().width
 		self.settings.screen_heigh = self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion")
+
+		self.clock = pygame.time.Clock()
 
 		# Create an instance to store game statistics,
 		#  and create a scoreboard.
@@ -44,6 +48,8 @@ class AlienInvasion:
 		"""Start the main loop for the game."""
 		while True:
 			self._check_events()
+			self.clock.tick(FPS)
+			
 			if self.stats.game_active:
 				self.ship.update()
 				self._update_bullets()

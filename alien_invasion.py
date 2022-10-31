@@ -1,8 +1,8 @@
 import sys
 from time import sleep
 import json
-
 import pygame
+import obstacle
 
 from settings import Settings
 from game_stats import GameStats
@@ -43,6 +43,20 @@ class AlienInvasion:
 		# Make the Play button.
 		self.play_button = Button(self, "Play")
 
+		# Ocstacle setup
+		self.shape = obstacle.shape
+		self.block_size = 6
+		self.blocks = pygame.sprite.Group()
+		self.obstacle_amount = 6
+
+		self.obstacle_x_position =[
+		num * (self.settings.screen_width / self.obstacle_amount) 
+		for num in range(self.obstacle_amount)]		
+
+		self.create_multiple_obstacle(*self.obstacle_x_position, 
+			x_start = self.settings.screen_width / 15,
+			y_start = self.settings.screen_heigh - 150)
+
 
 	def run_game(self):
 		"""Start the main loop for the game."""
@@ -53,6 +67,7 @@ class AlienInvasion:
 			if self.stats.game_active:
 				self.ship.update()
 				self._update_bullets()
+				
 				self._update_aliens()
 			self._update_screen()
 
@@ -167,6 +182,23 @@ class AlienInvasion:
 			self.sd.prep_level()
 
 
+	def create_obstacle(self, x_start, y_start, offset_x):
+		# We create an obstacle from blocks.
+		for row_index, row in enumerate(self.shape):
+			for col_index, col in enumerate(row):
+				if col == 'x':
+					x = x_start + col_index * self.block_size + offset_x
+					y = y_start + row_index * self.block_size
+					block = obstacle.Block(self.block_size, x, y)
+					self.blocks.add(block)
+
+
+	def create_multiple_obstacle(self, *offset, x_start, y_start):
+		# We move between obstacles.
+		for offset_x in offset:
+			self.create_obstacle(x_start, y_start, offset_x)
+
+
 	def _update_aliens(self):
 		"""
 		Check if the fleet is at an edge,
@@ -277,7 +309,9 @@ class AlienInvasion:
 		self.ship.blitme()
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet()
+		
 		self.aliens.draw(self.screen)
+		self.blocks.draw(self.screen)
 
 		# Draw the score information.
 		self.sd.show_score()

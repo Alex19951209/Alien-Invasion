@@ -1,8 +1,13 @@
+import pygame
+
 class Settings:
 	"""A class for saving all game settings."""
 
 	def __init__(self):
 		"""Initialize the game's static settings."""
+
+		pygame.init()
+		pygame.mixer.init()
 		# Screen settings.
 		self.screen_width = 1200
 		self.screen_height = 650
@@ -12,11 +17,16 @@ class Settings:
 		self.ship_limit = 3
 
 		# Bullet settings.
-		self.bullet_width = 3
+		self.bullet_width = 4
 		self.bullet_height = 15
 		self.bullet_color = (60, 60, 60)
 		self.bullets_allowed = 5
 
+		# Laser settings.
+		self.laser_width = 4
+		self.laser_height = 17
+		self.laser_color = (200, 60, 60)
+		
 		# Alien settings.
 		self.fleet_drop_speed = 10
 
@@ -34,6 +44,7 @@ class Settings:
 		self.ship_speed = 10.0
 		self.bullet_speed = 15.0
 		self.alien_speed = 5.0
+		self.laser_speed = 5	
 
 		# fleet_direction of 1 represents right; -1 represents left.
 		self.fleet_direction = 1
@@ -47,5 +58,6 @@ class Settings:
 		self.ship_speed *= self.speedup_scale
 		self.bullet_speed *= self.speedup_scale
 		self.alien_speed *= self.speedup_scale
+		self.laser_speed *= self.speedup_scale
 
 		self.alien_points = int(self.alien_points * self.score_scale)

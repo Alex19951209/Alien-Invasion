@@ -4,6 +4,8 @@ import json
 import pygame
 import obstacle
 
+import random
+
 from settings import Settings
 from game_stats import GameStats
 from scoreboard import Scoreboard
@@ -11,6 +13,8 @@ from button import Button
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
+from laser import Laser
+
 
 FPS = 60
 
@@ -24,7 +28,7 @@ class AlienInvasion:
 
 		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 		self.settings.screen_width = self.screen.get_rect().width
-		self.settings.screen_heigh = self.screen.get_rect().height
+		self.settings.screen_height = self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion")
 
 		self.clock = pygame.time.Clock()
@@ -37,6 +41,8 @@ class AlienInvasion:
 		self.ship = Ship(self)
 		self.bullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
+		self.lasers = pygame.sprite.Group()
+		self.alien_lasers = pygame.sprite.Group()
 
 		self._create_fleet()
 
@@ -49,13 +55,16 @@ class AlienInvasion:
 		self.blocks = pygame.sprite.Group()
 		self.obstacle_amount = 6
 
+		# We set the number and location of obstacles.
 		self.obstacle_x_position =[
 		num * (self.settings.screen_width / self.obstacle_amount) 
-		for num in range(self.obstacle_amount)]		
+		for num in range(self.obstacle_amount)]	
+		ship_height = self.ship.rect.height	
 
 		self.create_multiple_obstacle(*self.obstacle_x_position, 
 			x_start = self.settings.screen_width / 15,
-			y_start = self.settings.screen_heigh - 150)
+			y_start = self.settings.screen_height - (3 * ship_height))
+
 
 
 	def run_game(self):
@@ -67,7 +76,8 @@ class AlienInvasion:
 			if self.stats.game_active:
 				self.ship.update()
 				self._update_bullets()
-				
+				self._shots_aliens()
+				self._update_lazer()			
 				self._update_aliens()
 			self._update_screen()
 
@@ -225,6 +235,27 @@ class AlienInvasion:
 				break
 
 
+	def _shots_aliens(self):
+		""" Create a new laser and add it to the lasers group 
+		    and give it a location."""
+		if len(self.lasers) < 1 and len(self.aliens) > 0:
+			attacking_alien = random.choice(self.aliens.sprites())
+			laser = Laser(self, attacking_alien.rect.centerx,
+							    attacking_alien.rect.centery)
+			self.lasers.add(laser)
+
+
+	def _update_lazer(self):
+		"""Update position of lasers and get rid of old blasers."""
+		# Update lasers positions.
+		self.lasers.update()
+
+		# Get rid of lasers that have disappeared.
+		for laser in self.lasers.copy():
+			if laser.rect.top >= self.settings.screen_height:
+				self.lasers.remove(laser)
+
+   
 	def _ship_hit(self):
 		"""Respond to the ship being hit by an alien."""
 		if self.stats.ships_left > 0:
@@ -274,7 +305,7 @@ class AlienInvasion:
 		# Determine the number of rows of aliens that fit on the screen.
 		ship_height = self.ship.rect.height
 		available_space_y = (self.settings.screen_height -
-							(3 * alien_height) - ship_height)
+							(5 * alien_height) - ship_height)
 		number_rows = available_space_y // (2 * alien_height)
 
 		# Create the full fleet of aliens.
@@ -309,9 +340,13 @@ class AlienInvasion:
 		self.ship.blitme()
 		for bullet in self.bullets.sprites():
 			bullet.draw_bullet()
-		
+
+		for laser in self.lasers.sprites():
+			laser.draw_laser()
+
 		self.aliens.draw(self.screen)
 		self.blocks.draw(self.screen)
+		self.alien_lasers.draw(self.screen)
 
 		# Draw the score information.
 		self.sd.show_score()

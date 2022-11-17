@@ -5,7 +5,7 @@ class Settings:
 		"""Initialize the game's static settings."""
 		# Screen settings.
 		self.screen_width = 1200
-		self.screen_height = 650
+		self.screen_height = 750
 		self.bg_color = (230, 230, 230)
 
 		# Ship settings.
@@ -17,8 +17,12 @@ class Settings:
 		self.bullet_color = (60, 60, 60)
 		self.bullets_allowed = 5
 
+		# Block settings.
+		self.block_size = 5
+		self.obstacle_amount = 6
+
 		# Laser settings.
-		self.laser_width = 4
+		self.laser_width = 5
 		self.laser_height = 17
 		self.laser_color = (200, 60, 60)
 		
@@ -37,9 +41,9 @@ class Settings:
 	def initialize_dynamic_settings(self):
 		"""Initialize settings that change throughout the game."""
 		self.ship_speed = 10.0
-		self.bullet_speed = 15.0
+		self.bullet_speed = 10.0
 		self.alien_speed = 5.0
-		self.laser_speed = 5	
+		self.laser_speed = 9.0	
 
 		# fleet_direction of 1 represents right; -1 represents left.
 		self.fleet_direction = 1

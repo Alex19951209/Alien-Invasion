@@ -12,10 +12,13 @@ class Block(Sprite):
 		self.rect = self.image.get_rect(topleft =(x, y))
 
 shape = [
-'  xxxxxxx',
-' xxxxxxxxx',
-'xxxxxxxxxxx',
-'xxxxxxxxxxx',
-'xxxxxxxxxxx',
-'xxx     xxx',
-'xx       xx']
+'   xxxxxxxxxxx',
+'  xxxxxxxxxxxxx',
+' xxxxxxxxxxxxxxx',
+'xxxxxxxxxxxxxxxxx',
+'xxxxxxxxxxxxxxxxx',
+'xxxxxxxxxxxxxxxxx',
+'xxxxxxxxxxxxxxxxx',
+'xxxxxx     xxxxxx',
+'xxxxx       xxxxx',
+'xxxx         xxxx']

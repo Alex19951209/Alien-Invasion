@@ -26,7 +26,7 @@ class AlienInvasion:
 		pygame.init()
 		self.settings = Settings()
 
-		self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+		self.screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 		self.settings.screen_width = self.screen.get_rect().width
 		self.settings.screen_height = self.screen.get_rect().height
 		pygame.display.set_caption("Alien Invasion")
@@ -42,30 +42,16 @@ class AlienInvasion:
 		self.bullets = pygame.sprite.Group()
 		self.aliens = pygame.sprite.Group()
 		self.lasers = pygame.sprite.Group()
+		self.blocks = pygame.sprite.Group()
 		self.alien_lasers = pygame.sprite.Group()
 
 		self._create_fleet()
+		self._create_obstacle()
 
 		# Make the Play button.
 		self.play_button = Button(self, "Play")
 
-		# Ocstacle setup
-		self.shape = obstacle.shape
-		self.block_size = 6
-		self.blocks = pygame.sprite.Group()
-		self.obstacle_amount = 6
-
-		# We set the number and location of obstacles.
-		self.obstacle_x_position =[
-		num * (self.settings.screen_width / self.obstacle_amount) 
-		for num in range(self.obstacle_amount)]	
-		ship_height = self.ship.rect.height	
-
-		self.create_multiple_obstacle(*self.obstacle_x_position, 
-			x_start = self.settings.screen_width / 15,
-			y_start = self.settings.screen_height - (3 * ship_height))
-
-
+		
 
 	def run_game(self):
 		"""Start the main loop for the game."""
@@ -77,7 +63,7 @@ class AlienInvasion:
 				self.ship.update()
 				self._update_bullets()
 				self._shots_aliens()
-				self._update_lazer()			
+				self._update_laser()			
 				self._update_aliens()
 			self._update_screen()
 
@@ -117,10 +103,12 @@ class AlienInvasion:
 
 		# Get rid of any remaining aliens and bullets.
 		self.aliens.empty()
+		self.blocks.empty()
 		self.bullets.empty()
 
 		# Create a new fleet and center the ship.
 		self._create_fleet()
+		self._create_obstacle()
 		self.ship.center_ship()
 
 		# Hide the mouse cursor.
@@ -167,6 +155,7 @@ class AlienInvasion:
 				self.bullets.remove(bullet)
 
 		self._check_bullet_alien_collisions()
+		self._check_bullet_blocks_collisions()
 
 
 	def _check_bullet_alien_collisions(self):
@@ -184,7 +173,10 @@ class AlienInvasion:
 		if not self.aliens:
 			# Destroy existing bullets and create new fleet.
 			self.bullets.empty()
+			self.blocks.empty()
 			self._create_fleet()
+			self._create_obstacle()
+
 			self.settings.increase_speed()
 
 			# Increase level.
@@ -192,21 +184,41 @@ class AlienInvasion:
 			self.sd.prep_level()
 
 
-	def create_obstacle(self, x_start, y_start, offset_x):
+	def _check_bullet_blocks_collisions(self):
+		"""Respond to bullet-block collisions """
+		# Remove any balls and pieces of the obstacle that collided.
+		colisions = pygame.sprite.groupcollide(
+			self.bullets, self.blocks, True, True)
+
+
+	def _create_obstacle(self):
+		# We set the number and location of obstacles.
+		self.obstacle_x_position =[
+		num * (self.settings.screen_width / self.settings.obstacle_amount) 
+		for num in range(self.settings.obstacle_amount)]	
+		ship_height = self.ship.rect.height	
+
+		self._create_multiple_obstacle(self.obstacle_x_position, 
+			x_start = self.settings.screen_width / 15,
+			y_start = self.settings.screen_height - (3 * ship_height))
+
+
+	def create_block(self, x_start, y_start, offset_x):
 		# We create an obstacle from blocks.
+		self.shape = obstacle.shape
 		for row_index, row in enumerate(self.shape):
 			for col_index, col in enumerate(row):
 				if col == 'x':
-					x = x_start + col_index * self.block_size + offset_x
-					y = y_start + row_index * self.block_size
-					block = obstacle.Block(self.block_size, x, y)
+					x = x_start + col_index * self.settings.block_size + offset_x
+					y = y_start + row_index * self.settings.block_size
+					block = obstacle.Block(self.settings.block_size, x, y)
 					self.blocks.add(block)
 
 
-	def create_multiple_obstacle(self, *offset, x_start, y_start):
-		# We move between obstacles.
+	def _create_multiple_obstacle(self, offset, x_start, y_start):
+		# Follow the placement of obstacless.
 		for offset_x in offset:
-			self.create_obstacle(x_start, y_start, offset_x)
+			self.create_block(x_start, y_start, offset_x)
 
 
 	def _update_aliens(self):
@@ -217,12 +229,13 @@ class AlienInvasion:
 		self._check_fleet_edges()
 		self.aliens.update()
 
-		#  Look for alien-ship collisions.
+		#  Look for alien ship collisions.
 		if pygame.sprite.spritecollideany(self.ship, self.aliens):
 			self._ship_hit()
 
 		# Look for aliens hitting the bottom of the screen.
 		self._check_aliens_bottom()
+		self._check_aliens_block()
 
 
 	def _check_aliens_bottom(self):
@@ -235,6 +248,13 @@ class AlienInvasion:
 				break
 
 
+	def _check_aliens_block(self):
+		"""Check for collisions of aliens and obstacles."""
+		# Remove obstacles when encountering aliens.
+		colisions = pygame.sprite.groupcollide(
+			self.aliens, self.blocks, None, True)
+
+
 	def _shots_aliens(self):
 		""" Create a new laser and add it to the lasers group 
 		    and give it a location."""
@@ -245,7 +265,7 @@ class AlienInvasion:
 			self.lasers.add(laser)
 
 
-	def _update_lazer(self):
+	def _update_laser(self):
 		"""Update position of lasers and get rid of old blasers."""
 		# Update lasers positions.
 		self.lasers.update()
@@ -254,6 +274,32 @@ class AlienInvasion:
 		for laser in self.lasers.copy():
 			if laser.rect.top >= self.settings.screen_height:
 				self.lasers.remove(laser)
+
+		self._check_lasers_blocks_collisions()
+		self._check_lasers_bullets_collisions()
+		self._check_lasers_ship_collisions()		
+
+
+	def _check_lasers_blocks_collisions(self):
+		"""React to collisions of the bullet with an obstacle."""
+		# Remove any balls and pieces of the obstacle that collided.
+		colisions = pygame.sprite.groupcollide(
+			self.lasers, self.blocks, True, True)
+
+
+	def _check_lasers_bullets_collisions(self):
+		"""Respond to the collision of the ship's balls and alien balls."""
+		# Remove all the balls that have collided.
+		collisions = pygame.sprite.groupcollide(
+			self.bullets, self.lasers, True, True)
+
+
+	def _check_lasers_ship_collisions(self):
+		"""Check the collision of the laser of the aliens and the ship."""
+		# Remove all lasers and enable ship destruction.
+		if pygame.sprite.spritecollideany(self.ship, self.lasers):
+			self.lasers.empty()
+			self._ship_hit()
 
    
 	def _ship_hit(self):
@@ -265,10 +311,12 @@ class AlienInvasion:
 
 			# Get rid of any remaining aliens and bullets.
 			self.aliens.empty()
+			self.blocks.empty()
 			self.bullets.empty()
 
 			# Create a new fleet and center the ship.
 			self._create_fleet()
+			self._create_obstacle()
 			self.ship.center_ship()
 
 			# Pause.

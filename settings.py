@@ -24,7 +24,7 @@ class Settings:
 		# Laser settings.
 		self.laser_width = 5
 		self.laser_height = 17
-		self.laser_color = (200, 60, 60)
+		self.laser_color = (200, 10, 60)
 		
 		# Alien settings.
 		self.fleet_drop_speed = 10

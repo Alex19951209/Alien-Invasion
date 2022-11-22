@@ -33,6 +33,7 @@ class AlienInvasion:
 
 		self.clock = pygame.time.Clock()
 
+		# Play music while playin.
 		pygame.mixer.music.load('sounds/background.wav')
 		pygame.mixer.music.play(-1)
 
@@ -143,8 +144,10 @@ class AlienInvasion:
 	def _fire_bullet(self):
 		"""Create a new bullet and add it to the bullets group."""
 		if len(self.bullets) < self.settings.bullets_allowed:
+			# Play gunshot sound with each shot.
 			bullet_sound = pygame.mixer.Sound('sounds/shoot.wav')
 			bullet_sound.play()
+
 			new_bullet = Bullet(self)
 			self.bullets.add(new_bullet)
 
@@ -171,8 +174,10 @@ class AlienInvasion:
 
 		if collisions:
 			for aliens in collisions.values():
+				# Play the sound when a bullet and an alien collide.
 				explosion_sound = pygame.mixer.Sound('sounds/invaderkilled.wav')
 				explosion_sound.play()
+
 				self.stats.score += self.settings.alien_points * len(aliens)
 			self.sd.prep_score()
 			self.sd.check_high_score()
@@ -238,8 +243,6 @@ class AlienInvasion:
 
 		#  Look for alien ship collisions.
 		if pygame.sprite.spritecollideany(self.ship, self.aliens):
-			explosion_sound = pygame.mixer.Sound('sounds/shipexplosion.wav')
-			explosion_sound.play()
 			self._ship_hit()
 
 		# Look for aliens hitting the bottom of the screen.
@@ -252,9 +255,7 @@ class AlienInvasion:
 		screen_rect = self.screen.get_rect()
 		for alien in self.aliens.sprites():
 			if alien.rect.bottom >= screen_rect.bottom:
-				# Treat this the same as if the ship got hit.
-				explosion_sound = pygame.mixer.Sound('sounds/shipexplosion.wav')
-				explosion_sound.play()
+				# Treat this the same as if the ship got hit.				
 				self._ship_hit()
 				break
 
@@ -304,6 +305,7 @@ class AlienInvasion:
 		collisions = pygame.sprite.groupcollide(
 			self.bullets, self.lasers, True, True)
 		if collisions:
+			# Play the sound when a bullet and a laser collide.
 			explosion_sound = pygame.mixer.Sound('sounds/invaderkilled.wav')
 			explosion_sound.play()
 
@@ -311,9 +313,7 @@ class AlienInvasion:
 	def _check_lasers_ship_collisions(self):
 		"""Check the collision of the laser of the aliens and the ship."""
 		# Remove all lasers and enable ship destruction.
-		if pygame.sprite.spritecollideany(self.ship, self.lasers):
-			explosion_sound = pygame.mixer.Sound('sounds/shipexplosion.wav')
-			explosion_sound.play()
+		if pygame.sprite.spritecollideany(self.ship, self.lasers):			
 			self.lasers.empty()
 			self._ship_hit()
 
@@ -321,6 +321,11 @@ class AlienInvasion:
 	def _ship_hit(self):
 		"""Respond to the ship being hit by an alien."""
 		if self.stats.ships_left > 0:
+
+			# Play the sound of a ship explosion.
+			explosion_sound = pygame.mixer.Sound('sounds/shipexplosion.wav')
+			explosion_sound.play()
+
 			# Decrement ships_left.
 			self.stats.ships_left -= 1
 			self.sd.prep_ships()

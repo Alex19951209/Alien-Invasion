@@ -15,7 +15,7 @@ Arrows keys (left - right)
 Move the ship left / right
 ⚔ Let's play
 Cloning the Repository
-$ git clone https://github.com/bryanlds/Alien-Invasion.git
+$ git clone https://github.com/Alex19951209/Alien-Invasion
 
 $ cd Alien-Invasion
 Running

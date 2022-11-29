@@ -183,17 +183,22 @@ class AlienInvasion:
 			self.sd.check_high_score()
 
 		if not self.aliens:
-			# Destroy existing bullets and create new fleet.
-			self.bullets.empty()
-			self.blocks.empty()
-			self._create_fleet()
-			self._create_obstacle()
+			self._start_new_level()
 
-			self.settings.increase_speed()
 
-			# Increase level.
-			self.stats.level += 1
-			self.sd.prep_level()
+	def _stats_new_level(self):
+		"""Start a new level."""
+		# Destroy existing bullets and create new fleet.
+		self.bullets.empty()
+		self.blocks.empty()
+		self._create_fleet()
+		self._create_obstacle()
+
+		self.settings.increase_speed()
+
+		# Increase level.
+		self.stats.level += 1
+		self.sd.prep_level()
 
 
 	def _check_bullet_blocks_collisions(self):
@@ -385,7 +390,7 @@ class AlienInvasion:
 
 	def _create_alien(self, alien_number, row_number):
 		"""Create an alien and place it in the row."""
-		#Create an alien and place it in a row.
+		# Create an alien and place it in a row.
 		alien = Alien(self)
 		alien_width, alien_height = alien.rect.size
 		alien.x = alien_width + 2 * alien_width * alien_number
